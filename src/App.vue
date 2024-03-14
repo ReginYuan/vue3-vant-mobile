@@ -1,30 +1,63 @@
 <script setup lang="ts">
-import type { ConfigProviderTheme } from 'vant'
-import { localStorage } from '@/utils/local-storage'
-import { useStore } from '@/stores'
+import { storeToRefs } from 'pinia'
+import useAppStore from '@/stores/modules/app'
+import useRouteTransitionNameStore from '@/stores/modules/routeTransitionName'
+import useAutoThemeSwitcher from '@/hooks/useAutoThemeSwitcher'
 
-const store = useStore()
-const theme = ref<ConfigProviderTheme>('light')
-const mode = computed(() => store.mode)
+useHead({
+  title: 'Vue3 Vant Mobile',
+  meta: [
+    {
+      name: 'description',
+      content: 'Vue + Vite H5 Starter Template',
+    },
+    {
+      name: 'theme-color',
+      content: () => isDark.value ? '#00aba9' : '#ffffff',
+    },
+  ],
+  link: [
+    {
+      rel: 'icon',
+      type: 'image/svg+xml',
+      href: () => preferredDark.value ? '/favicon-dark.svg' : '/favicon.svg',
+    },
+  ],
+})
 
-watch(mode, (val) => {
-  if (val === 'dark' || localStorage.get('theme') === 'dark') {
-    theme.value = 'dark'
-    document.querySelector('html')
-      .setAttribute('data-theme', 'dark')
-  }
-  else {
-    theme.value = 'light'
-    document.querySelector('html')
-      .setAttribute('data-theme', 'light')
-  }
-}, { immediate: true })
+const appStore = useAppStore()
+const { mode } = storeToRefs(appStore)
 
-provide('isRealDark', computed(() => theme.value === 'dark'))
+const routeTransitionNameStore = useRouteTransitionNameStore()
+const { routeTransitionName } = storeToRefs(routeTransitionNameStore)
+
+const { initializeThemeSwitcher } = useAutoThemeSwitcher(appStore)
+
+onMounted(() => {
+  initializeThemeSwitcher()
+})
 </script>
 
 <template>
-  <VanConfigProvider :theme="theme">
-    <RouterView />
+  <VanConfigProvider :theme="mode">
+    <NavBar />
+    <router-view v-slot="{ Component, route }">
+      <transition :name="routeTransitionName">
+        <div :key="route.name" class="app-wrapper">
+          <component :is="Component" />
+        </div>
+      </transition>
+    </router-view>
   </VanConfigProvider>
 </template>
+
+<style scoped>
+.app-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 46px;
+  left: 0;
+  overflow-y: auto;
+}
+</style>

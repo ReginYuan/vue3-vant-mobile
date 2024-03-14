@@ -1,13 +1,10 @@
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import { createRouterScroller } from 'vue-router-better-scroller'
-import App from './App.vue'
-import router from './router'
-
+import { createHead } from '@unhead/vue'
+import App from '@/App.vue'
+import router from '@/router'
+import pinia from '@/stores'
 import 'virtual:uno.css'
-
-import './app.less'
+import '@/styles/app.less'
 
 // Vant 桌面端适配
 import '@vant/touch-emulator'
@@ -24,19 +21,10 @@ import 'vant/es/notify/style'
 import 'vant/es/image-preview/style'
 
 const app = createApp(App)
-const pinia = createPinia()
-pinia.use(piniaPluginPersistedstate)
+const head = createHead()
 
+app.use(head)
 app.use(router)
 app.use(pinia)
-
-// 增强了 Vue Router v4 的滚动行为
-app.use(createRouterScroller({
-  selectors: {
-    'window': true,
-    'body': true,
-    '.scrollable': true,
-  },
-}))
 
 app.mount('#app')

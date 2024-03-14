@@ -1,10 +1,7 @@
-import { defineStore } from 'pinia'
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
-export const useStore = defineStore({
-  id: 'index',
-  persist: true,
-  state: () => ({
-    // light || dark
-    mode: '',
-  }),
-})
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
+export default pinia
